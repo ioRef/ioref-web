@@ -1,38 +1,53 @@
 {% comment %}
     Sidebar stock block for a component with a single stocked part. Omitted
     entirely when inventory is unreachable -- the guide content is the point of
-    the page and reads fine without a count.
+    the page and reads fine without a count. Each row is omitted when inventory
+    has nothing to put in it.
 {% endcomment %}
 {% if stock %}
-    <div class="attribute">
-        <div class="label">IDeATe Location:</div>
-        <div class="value">{{ stock.location|default:"—" }}</div>
-    </div>
-    <div class="attribute">
-        <div class="label">On the floor:</div>
-        <div class="value">{% if stock.on_floor != None %}{{ stock.on_floor }} {{ stock.unit }}{% else %}not counted{% endif %}</div>
-    </div>
-    <div class="attribute">
-        <div class="label">Backstock:</div>
-        <div class="value">{% if stock.in_backstock != None %}{{ stock.in_backstock }} {{ stock.unit }}{% else %}not counted{% endif %}</div>
-    </div>
-    {% if stock.latest_price %}
+    {% if stock.group.name %}
         <div class="attribute">
-            <div class="label">Supplier:</div>
-            <div class="value">
-                {% if stock.latest_price.purchase_link %}
-                    <a href="{{ stock.latest_price.purchase_link }}" target="_blank" rel="noopener">{{ stock.latest_price.supplier|default:"Purchase link" }}</a>
-                {% else %}{{ stock.latest_price.supplier|default:"—" }}{% endif %}
-            </div>
+            <div class="label">Kind:</div>
+            <div class="value">{{ stock.group.name }}</div>
         </div>
+    {% endif %}
+    {% if stock.location %}
         <div class="attribute">
-            <div class="label">Last known price:</div>
-            <div class="value">${{ stock.latest_price.price }} per {{ stock.unit }}</div>
+            <div class="label">Phys Comp Lab location:</div>
+            <div class="value">{{ stock.location }}</div>
+        </div>
+    {% endif %}
+    {% if stock.description %}
+        <div class="attribute">
+            <div class="label">Description:</div>
+            <div class="value">{{ stock.description }}</div>
         </div>
     {% endif %}
     <div class="attribute">
-        <div class="value">
-            <a class="text-decoration-underline" href="https://inventory.ioref.org/parts/{{ stock.part_number|urlencode }}/">Full stock history<svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 0.35rem"><path d="M0 13.1683V0.00166702H6.26271V1.085H1.08333V12.085H12.0833V6.90563H13.1667V13.1683H0ZM4.66187 9.28042L3.88792 8.50646L11.3094 1.085H8.58333V0.00166702H13.1667V4.585H12.0833V1.85896L4.66187 9.28042Z" fill="currentColor"/></svg></a>
-        </div>
+        <div class="label">Available in the lab:</div>
+        <div class="value">{% if stock.on_floor != None %}{{ stock.on_floor }}{% if stock.unit and stock.unit != "each" %} {{ stock.unit }}{% endif %}{% else %}not counted{% endif %}</div>
     </div>
+    <div class="attribute">
+        <div class="label">Backstock:</div>
+        <div class="value">{% if stock.in_backstock != None %}{{ stock.in_backstock }}{% if stock.unit and stock.unit != "each" %} {{ stock.unit }}{% endif %}{% else %}not counted{% endif %}</div>
+    </div>
+    {% if stock.latest_price.supplier %}
+        <div class="attribute">
+            <div class="label">Supplier:</div>
+            <div class="value">{{ stock.latest_price.supplier }}</div>
+        </div>
+    {% endif %}
+    {% if stock.latest_price.purchase_link %}
+        <div class="attribute">
+            <div class="value">
+                <a class="text-decoration-underline" href="{{ stock.latest_price.purchase_link }}" target="_blank" rel="noopener">Purchase link<svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 0.35rem"><path d="M0 13.1683V0.00166702H6.26271V1.085H1.08333V12.085H12.0833V6.90563H13.1667V13.1683H0ZM4.66187 9.28042L3.88792 8.50646L11.3094 1.085H8.58333V0.00166702H13.1667V4.585H12.0833V1.85896L4.66187 9.28042Z" fill="currentColor"/></svg></a>
+            </div>
+        </div>
+    {% endif %}
+    {% if stock.latest_price.price is not None %}
+        <div class="attribute">
+            <div class="label">Cost:</div>
+            <div class="value">{% if stock.latest_price.currency != "USD" %}{{ stock.latest_price.currency }} {% else %}${% endif %}{{ stock.latest_price.price|floatformat:2 }}{% if stock.unit and stock.unit != "each" %} per {{ stock.unit }}{% endif %}</div>
+        </div>
+    {% endif %}
 {% endif %}

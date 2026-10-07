@@ -147,7 +147,6 @@ class Part:
     slug: str
     title: str
     description: str = ""
-    signal_type: str = ""
     image: str = ""
     group: str = ""
     hidden: bool = False
@@ -352,7 +351,6 @@ def load():
             slug=path.stem,
             title=front["title"],
             description=front.get("description", ""),
-            signal_type=front.get("signal_type", ""),
             image=front.get("image", ""),
             group=group,
             hidden=bool(front.get("hidden", False)),

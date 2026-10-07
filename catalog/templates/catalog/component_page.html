@@ -12,27 +12,10 @@
     <div class="side_menu part_attributes shrinkable">
         <div class="part_name">{{ page.title }}</div>
 
-        {% if page.signal_type %}
-            <div class="attribute">
-                <div class="label">Signal Type:</div>
-                <div class="value">{{ page.signal_type }}</div>
-            </div>
-        {% endif %}
-
-
-        {% for set in page.part_sets %}
-            <div class="attribute">
-                <div class="label">Part Set:</div>
-                <div class="value"><a href="{{ set.url }}">{{ set.title }}</a></div>
-            </div>
-        {% endfor %}
-
-        {% if page.description %}<div class="attribute">{{ page.description }}</div>{% endif %}
-
         {% if variants|length == 1 %}
             {% with v=variants.0 %}
                 <div class="attribute">
-                    <div class="label">IDeATe Component Number:</div>
+                    <div class="label">ioRef component number:</div>
                     <div class="value">{{ v.number }}</div>
                 </div>
                 {% include "includes/variant_stock.html" with stock=v.stock %}

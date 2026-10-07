@@ -169,7 +169,6 @@ def _stock_only_page(stock):
     return SimpleNamespace(
         title=stock.get("short_name") or stock["part_number"],
         description="",
-        signal_type="",
         part_sets=[],
         sections=[],
         image=None,

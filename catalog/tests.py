@@ -353,7 +353,7 @@ class ViewTests(SimpleTestCase):
         self.assertContains(response, "M3 bolt")
         self.assertContains(response, "0046")
         self.assertContains(response, "A4")
-        self.assertContains(response, 'href="https://inventory.ioref.org/parts/0046/"')
+        self.assertNotContains(response, "Full stock history")
 
     @patch("catalog.views.get_part")
     def test_ungrouped_part_can_use_an_explicit_guide(self, mock_get):
