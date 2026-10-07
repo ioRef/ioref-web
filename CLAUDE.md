@@ -284,7 +284,8 @@ Types in use: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `perf`,
 `deploy`). Breaking changes take a `!` before the colon and a
 `BREAKING CHANGE:` footer.
 
-List items in commit bodies use `*`, not `-`. No `Co-Authored-By` trailer.
+List items in commit bodies use `*`, not `-`. Commits made with Claude end with a
+`Co-Authored-By:` trailer.
 
 The subject is imperative and lower-case, under about 72 characters. Where a
 change encodes a decision, put the reasoning in the body -- this project has
