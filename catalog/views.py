@@ -161,7 +161,12 @@ def part(request, slug):
     if page is None:
         page = _stock_only_page(stock)
 
-    return _render_part(request, page, [_variant(stock)])
+    # A group guide documents every part in its group, so it cannot name one.
+    part_title = None
+    if page.group and page.group == (stock.get("group") or {}).get("slug"):
+        part_title = stock.get("short_name") or stock["part_number"]
+
+    return _render_part(request, page, [_variant(stock)], part_title=part_title)
 
 
 def _stock_only_page(stock):
@@ -169,6 +174,7 @@ def _stock_only_page(stock):
     return SimpleNamespace(
         title=stock.get("short_name") or stock["part_number"],
         description="",
+        group="",
         part_sets=[],
         sections=[],
         image=None,
@@ -197,13 +203,13 @@ def _variant(stock):
     }
 
 
-def _render_part(request, page, variants):
-
+def _render_part(request, page, variants, part_title=None):
     return render(
         request,
         "catalog/component_page.html",
         {
             "page": page,
+            "part_title": part_title,
             "variants": variants,
             "related_parts": page.related_parts,
         },

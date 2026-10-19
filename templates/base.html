@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>{% block title %}{{ page.title }}{% endblock %}{% block title_suffix %} | {{ settings.SITE_NAME|default:"IOref" }}{% endblock %}</title>
+    <title>{% block title %}{% if part_title %}{{ part_title }}{% else %}{{ page.title }}{% endif %}{% endblock %}{% block title_suffix %} | {{ settings.SITE_NAME|default:"IOref" }}{% endblock %}</title>
     {% if page.description %}<meta name="description" content="{{ page.description }}">{% endif %}
 
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'apple-touch-icon.png' %}">

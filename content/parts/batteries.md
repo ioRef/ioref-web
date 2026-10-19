@@ -1,6 +1,6 @@
 ---
-title: 9V Battery
-description: 9V battery, alkaline or carbon zinc
+title: Batteries
+description: Batteries for powering projects
 signal_type: n/a
 image: 0892.jpg
 related:

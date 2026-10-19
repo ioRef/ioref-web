@@ -316,6 +316,19 @@ class ViewTests(SimpleTestCase):
         self.assertContains(response, "A1")
         self.assertNotContains(response, "Full stock history →")
 
+    @patch("catalog.views.get_part")
+    def test_group_guide_title_is_the_part_not_the_guide(self, mock_get):
+        mock_get.return_value = {
+            "part_number": "2032",
+            "group": {"slug": "batteries", "name": "Batteries"},
+            "short_name": "CR2032 coin cell battery",
+        }
+
+        response = self.client.get("/parts/2032/")
+
+        self.assertContains(response, "<title>CR2032 coin cell battery")
+        self.assertContains(response, '<div class="part_name">CR2032 coin cell battery</div>')
+
     @patch("stock.client.list_by_group")
     def test_group_stock_table_links_each_variant_to_its_guide_view(self, mock_list):
         mock_list.return_value = [

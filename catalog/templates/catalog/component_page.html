@@ -10,7 +10,7 @@
 {% block content %}
 <div class="part_page">
     <div class="side_menu part_attributes shrinkable">
-        <div class="part_name">{{ page.title }}</div>
+        <div class="part_name">{{ part_title|default:page.title }}</div>
 
         {% if variants|length == 1 %}
             {% with v=variants.0 %}
@@ -34,7 +34,7 @@
 
     <div class="content">
         {% if page.image %}
-            <div class="part_image"><img src="{{ page.image_url }}" alt="{{ page.title }}"></div>
+            <div class="part_image"><img src="{{ page.image_url }}" alt="{{ part_title|default:page.title }}"></div>
         {% endif %}
 
         {% for section in page.sections %}
