@@ -329,6 +329,38 @@ class ViewTests(SimpleTestCase):
         self.assertContains(response, "<title>CR2032 coin cell battery")
         self.assertContains(response, '<div class="part_name">CR2032 coin cell battery</div>')
 
+    @patch("catalog.views.get_part")
+    def test_schemeless_purchase_link_renders_as_https(self, mock_get):
+        mock_get.return_value = {
+            "part_number": "1829",
+            "group": {"slug": "fasteners", "name": "Fasteners"},
+            "short_name": "Shoulder screw",
+            "latest_price": {
+                "supplier": "McMaster-Carr",
+                "purchase_link": "mcmaster.com/#92095A182",
+                "price": "0.08380",
+                "currency": "USD",
+            },
+        }
+
+        response = self.client.get("/parts/1829/")
+
+        self.assertContains(response, 'href="https://mcmaster.com/#92095A182"')
+        self.assertNotContains(response, 'href="/parts/1829/mcmaster.com')
+
+    @patch("catalog.views.get_part")
+    def test_unsafe_purchase_link_hides_the_row(self, mock_get):
+        mock_get.return_value = {
+            "part_number": "1829",
+            "group": {"slug": "fasteners", "name": "Fasteners"},
+            "short_name": "Shoulder screw",
+            "latest_price": {"supplier": "Shelf", "purchase_link": "shelf 3"},
+        }
+
+        response = self.client.get("/parts/1829/")
+
+        self.assertNotContains(response, "Purchase link")
+
     @patch("stock.client.list_by_group")
     def test_group_stock_table_links_each_variant_to_its_guide_view(self, mock_list):
         mock_list.return_value = [

@@ -4,6 +4,7 @@
     the page and reads fine without a count. Each row is omitted when inventory
     has nothing to put in it.
 {% endcomment %}
+{% load links %}
 {% if stock %}
     {% if stock.group.name %}
         <div class="attribute">
@@ -37,13 +38,15 @@
             <div class="value">{{ stock.latest_price.supplier }}</div>
         </div>
     {% endif %}
-    {% if stock.latest_price.purchase_link %}
-        <div class="attribute">
-            <div class="value">
-                <a class="text-decoration-underline" href="{{ stock.latest_price.purchase_link }}" target="_blank" rel="noopener">Purchase link<svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 0.35rem"><path d="M0 13.1683V0.00166702H6.26271V1.085H1.08333V12.085H12.0833V6.90563H13.1667V13.1683H0ZM4.66187 9.28042L3.88792 8.50646L11.3094 1.085H8.58333V0.00166702H13.1667V4.585H12.0833V1.85896L4.66187 9.28042Z" fill="currentColor"/></svg></a>
+    {% with link=stock.latest_price.purchase_link|external_href %}
+        {% if link %}
+            <div class="attribute">
+                <div class="value">
+                    <a class="text-decoration-underline" href="{{ link }}" target="_blank" rel="noopener">Purchase link<svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 0.35rem"><path d="M0 13.1683V0.00166702H6.26271V1.085H1.08333V12.085H12.0833V6.90563H13.1667V13.1683H0ZM4.66187 9.28042L3.88792 8.50646L11.3094 1.085H8.58333V0.00166702H13.1667V4.585H12.0833V1.85896L4.66187 9.28042Z" fill="currentColor"/></svg></a>
+                </div>
             </div>
-        </div>
-    {% endif %}
+        {% endif %}
+    {% endwith %}
     {% if stock.latest_price.price is not None %}
         <div class="attribute">
             <div class="label">Cost:</div>
