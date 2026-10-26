@@ -153,10 +153,15 @@
   font-style: italic;
 }
 
-.search-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
-.search-col h2 { font-size: 22px; font-weight: bold; margin-bottom: .75rem; }
+
+.search-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: start; margin-top: 1.5rem; }
+.search-col h2 { font-size: 26px; font-weight: bold; margin: 0 0 1rem; padding-bottom: .4rem; border-bottom: 2px solid #1d1d1d; }
+.search-col ul { list-style: none; padding: 0; margin: 0; }
+.search-col li { margin-bottom: 1.1rem; }
+.search-col li h4 { font-size: 20px; margin: 0 0 .15rem; }
+.search-col .result-desc { margin: 0; font-size: 15px; line-height: 1.4; color: #4f4f4f; }
 .search-col .no-results, .search-col .search-more { color: #636466; font-style: italic; }
-.search-col li.discontinued h4 a, .search-col li.discontinued { text-decoration: line-through; color: #636466; }
+.search-col li.discontinued, .search-col li.discontinued h4 a { text-decoration: line-through; color: #636466; }
 @media (max-width: 700px) {
-    .search-columns { grid-template-columns: 1fr; gap: 1.25rem; }
+    .search-columns { grid-template-columns: 1fr; gap: 2rem; }
 }

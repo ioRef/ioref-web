@@ -6,12 +6,7 @@
 {% block title %}Search{% endblock %}
 
 {% block content %}
-<h1>Search</h1>
-
-<form action="{% url 'search' %}" method="get">
-    <input type="text" name="query"{% if search_query %} value="{{ search_query }}"{% endif %}>
-    <input type="submit" value="Search" class="button">
-</form>
+<h1>{% if search_query %}Results for &ldquo;{{ search_query }}&rdquo;{% else %}Search{% endif %}</h1>
 
 {% if search_query %}
 <div class="search-columns">
@@ -23,7 +18,7 @@
             <li>
                 <h4><a href="{{ result.url }}">{{ result.title }}</a></h4>
                 {% if result.description %}
-                {{ result.description }}
+                <p class="result-desc">{{ result.description }}</p>
                 {% endif %}
             </li>
             {% endfor %}
@@ -43,7 +38,7 @@
             <li class="{% if part.status == 'discontinued' %}discontinued{% endif %}">
                 <h4><a href="{% url 'part' part.part_number %}">{{ part.part_number }} {{ part.short_name }}</a></h4>
                 {% if part.description %}
-                {{ part.description }}
+                <p class="result-desc">{{ part.description }}</p>
                 {% endif %}
             </li>
             {% endfor %}
