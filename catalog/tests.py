@@ -18,6 +18,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import httpx
 from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import CommandError
@@ -653,3 +654,60 @@ class CheckCategoriesTests(SimpleTestCase):
             with self.assertRaises(CommandError) as caught:
                 call_command("check_categories", stdout=io.StringIO())
         self.assertIn("unreachable", str(caught.exception))
+
+
+class StockReportTests(SimpleTestCase):
+    STOCK = {
+        "part_number": "0006",
+        "short_name": "soldering sponge",
+        "group": {"slug": "fasteners", "name": "Fasteners"},
+        "location": "Soldering bench",
+    }
+
+    @patch("catalog.views.get_part")
+    def test_buttons_show_only_to_a_signed_in_person(self, mock_get):
+        mock_get.return_value = dict(self.STOCK)
+        self.assertNotContains(self.client.get("/parts/0006/"), "Report out of stock")
+        response = self.client.get("/parts/0006/", HTTP_EPPN="rzachari@andrew.cmu.edu")
+        self.assertContains(response, "Report out of stock")
+        self.assertContains(response, 'action="/parts/0006/report/"')
+
+    def test_anonymous_report_is_refused(self):
+        response = self.client.post("/parts/0006/report/", {"kind": "out"})
+        self.assertEqual(response.status_code, 403)
+
+    @patch("catalog.views.file_stock_report", return_value=True)
+    def test_signed_in_report_is_filed_and_the_person_is_thanked(self, mock_file):
+        response = self.client.post(
+            "/parts/0006/report/", {"kind": "out"}, HTTP_EPPN="rzachari@andrew.cmu.edu"
+        )
+        mock_file.assert_called_once_with("0006", "out", "rzachari@andrew.cmu.edu")
+        self.assertRedirects(response, "/parts/0006/?reported=out", fetch_redirect_response=False)
+
+    @patch("catalog.views.file_stock_report", return_value=False)
+    def test_a_failed_report_says_so(self, mock_file):
+        response = self.client.post("/parts/0006/report/", {"kind": "low"}, HTTP_EPPN="x@andrew.cmu.edu")
+        self.assertRedirects(response, "/parts/0006/?reported=error", fetch_redirect_response=False)
+
+    @patch("catalog.views.file_stock_report")
+    def test_unknown_kind_and_cross_site_posts_are_refused(self, mock_file):
+        self.assertEqual(
+            self.client.post("/parts/0006/report/", {"kind": "maybe"}, HTTP_EPPN="x@andrew.cmu.edu").status_code, 400
+        )
+        self.assertEqual(
+            self.client.post(
+                "/parts/0006/report/", {"kind": "out"},
+                HTTP_EPPN="x@andrew.cmu.edu", HTTP_ORIGIN="https://evil.example",
+            ).status_code,
+            403,
+        )
+        mock_file.assert_not_called()
+
+    def test_get_is_not_allowed(self):
+        self.assertEqual(self.client.get("/parts/0006/report/", HTTP_EPPN="x@andrew.cmu.edu").status_code, 405)
+
+    @patch("stock.client._client", side_effect=httpx.ConnectError("down"))
+    def test_inventory_outage_means_not_filed(self, _):
+        from stock.client import report_stock
+
+        self.assertFalse(report_stock("0006", "out", "x@andrew.cmu.edu"))

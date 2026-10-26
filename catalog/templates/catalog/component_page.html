@@ -18,7 +18,7 @@
                     <div class="label">ioRef component number:</div>
                     <div class="value">{{ v.number }}</div>
                 </div>
-                {% include "includes/variant_stock.html" with stock=v.stock %}
+                {% include "includes/variant_stock.html" with stock=v.stock can_report=can_report reported=reported %}
             {% endwith %}
         {% endif %}
 

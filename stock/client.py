@@ -241,6 +241,21 @@ def list_ungrouped_parts_by_category(category_slug: str) -> list[dict]:
     return data.get("results", [])
 
 
+def report_stock(part_number: str, kind: str, reporter: str) -> bool:
+    """File a low or out-of-stock report. False if inventory did not take it."""
+    try:
+        with _client() as client:
+            response = client.post(
+                f"/api/v1/parts/{part_number}/stock-reports/",
+                json={"kind": kind, "reported_by": reporter},
+            )
+            response.raise_for_status()
+    except httpx.HTTPError as exc:
+        log.warning("Stock report for %s not filed: %s", part_number, exc)
+        return False
+    return True
+
+
 def get_part(part_number: str) -> dict | None:
     try:
         return _get(f"/api/v1/parts/{part_number}/")
