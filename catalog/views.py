@@ -15,6 +15,7 @@ from django.shortcuts import redirect, render
 from stock.client import (
     InventoryUnavailable,
     get_part,
+    list_parts,
     list_groups_by_category,
     list_ungrouped_parts_by_category,
 )
@@ -272,11 +273,29 @@ def part_set(request, slug):
     )
 
 
+PART_RESULT_LIMIT = 50
+
+
 def search(request):
     catalogue = get_catalogue()
     query = request.GET.get("query", "")
+    parts, part_total, parts_unavailable = [], 0, False
+    if query.strip():
+        try:
+            data = list_parts(search=query.strip(), limit=PART_RESULT_LIMIT)
+        except InventoryUnavailable:
+            parts_unavailable = True
+        else:
+            parts = data.get("results", [])
+            part_total = data.get("count", len(parts))
     return render(
         request,
         "catalog/search.html",
-        {"search_query": query, "search_results": catalogue.search(query)},
+        {
+            "search_query": query,
+            "guide_results": catalogue.search(query),
+            "part_results": parts,
+            "part_total": part_total,
+            "parts_unavailable": parts_unavailable,
+        },
     )

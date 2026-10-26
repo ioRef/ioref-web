@@ -13,24 +13,48 @@
     <input type="submit" value="Search" class="button">
 </form>
 
-{% if search_results %}
-<ul>
-    {% for result in search_results %}
-    <li>
-        <h4><a href="{{ result.url }}">{{ result.title }}</a></h4>
-        {% if result.description %}
-        {{ result.description }}
+{% if search_query %}
+<div class="search-columns">
+    <section class="search-col">
+        <h2>ioRef Guides</h2>
+        {% if guide_results %}
+        <ul>
+            {% for result in guide_results %}
+            <li>
+                <h4><a href="{{ result.url }}">{{ result.title }}</a></h4>
+                {% if result.description %}
+                {{ result.description }}
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="no-results">No results for ioRef Guides</p>
         {% endif %}
-    </li>
-    {% endfor %}
-</ul>
+    </section>
 
-{% comment %}
-    No pagination. The whole catalogue is 130 parts, so every match for any
-    query fits on one page; the Wagtail version paginated because its backend
-    returned a lazy queryset, not because the result sets were ever large.
-{% endcomment %}
-{% elif search_query %}
-No results found
+    <section class="search-col">
+        <h2>Phys Comp Lab Parts</h2>
+        {% if parts_unavailable %}
+        <p class="no-results">Parts search is unavailable right now.</p>
+        {% elif part_results %}
+        <ul>
+            {% for part in part_results %}
+            <li class="{% if part.status == 'discontinued' %}discontinued{% endif %}">
+                <h4><a href="{% url 'part' part.part_number %}">{{ part.part_number }} {{ part.short_name }}</a></h4>
+                {% if part.description %}
+                {{ part.description }}
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% if part_total > part_results|length %}
+        <p class="search-more">Showing the first {{ part_results|length }} of {{ part_total }} parts.</p>
+        {% endif %}
+        {% else %}
+        <p class="no-results">No results for Phys Comp Lab Parts</p>
+        {% endif %}
+    </section>
+</div>
 {% endif %}
 {% endblock %}

@@ -152,3 +152,11 @@
   color: #636466;
   font-style: italic;
 }
+
+.search-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+.search-col h2 { font-size: 22px; font-weight: bold; margin-bottom: .75rem; }
+.search-col .no-results, .search-col .search-more { color: #636466; font-style: italic; }
+.search-col li.discontinued h4 a, .search-col li.discontinued { text-decoration: line-through; color: #636466; }
+@media (max-width: 700px) {
+    .search-columns { grid-template-columns: 1fr; gap: 1.25rem; }
+}
