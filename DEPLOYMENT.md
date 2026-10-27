@@ -181,15 +181,26 @@ image is created by the first deployment, the same as ioref-inventory's.
 
 ## 6. Configure Apache
 
-No Shibboleth involvement at all: this application has no `AUTH_MODE`, reads
-no identity headers, and has nothing analogous to `TrustedHeaderBackend` for a
-proxy to protect. The entire "strip client-supplied identity headers" section
-that dominates ioref-inventory's Apache setup does not apply here.
+`02-ioref.org.conf` (see ioref-inventory's `DEPLOYMENT.md` §6) already
+proxies the apex `/` to `127.0.0.1:8989`, and this container's Quadlet
+publishes to that same port (§5 above).
 
-**No conf edit is needed.** `02-ioref.org.conf` (see ioref-inventory's
-`DEPLOYMENT.md` §6) already proxies the apex `/` to `127.0.0.1:8989`. This
-container's Quadlet publishes to that same port (§5 above), so the existing
-`ProxyPass` line reaches it once the container is running.
+Stock reports read the reporter from the `Eppn` header, so part pages need a
+lazy Shibboleth session. Inside the apex `VirtualHost`, alongside the
+`/inventory` blocks:
+
+```apache
+<LocationMatch "^/parts/[^/]+/(report/)?$">
+  AuthType shibboleth
+  ShibRequestSetting requireSession 0
+  ShibUseHeaders On
+  Require shibboleth
+</LocationMatch>
+```
+
+`requireSession 0` keeps the pages public. The vhost's
+`RequestHeader unset Eppn early` is what makes the header trustworthy, and it
+must stay vhost-wide, not inside an `/inventory` block.
 
 `guides.ioref.org` keeps redirecting to the apex, unchanged: that redirect
 exists because no Shibboleth endpoint is registered for that name, which

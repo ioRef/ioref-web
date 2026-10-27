@@ -120,12 +120,17 @@ test in the Commands section checks the URLs.
 straight copy of maker-cards' compiled stylesheet; additions go in `site.css`
 so the copy can be resynced without merging.
 
-**There is no sign-in, because there is nothing to sign in to.** An earlier
-revision put the Wagtail admin behind CMU Shibboleth, with a custom user model,
-a trusted-header backend and a vhost that cleared the identity headers. All of
-it went when the CMS did; recover it from git history if a web editor ever comes
-back. ioref-inventory still uses that arrangement for staff count entry, and is
-unaffected.
+**Sign-in exists for one thing: filing a stock report.** There are no accounts
+and no sessions here. Part pages sit under a lazy Shibboleth session, so a
+visitor who has signed in arrives with `Eppn` and one who has not arrives
+without it and sees a sign-in link instead of the report buttons. The report
+itself is stored in ioref-inventory, which emails it.
+
+`REPORT_IDENTITY_HEADER` is trusted unconditionally, which is safe only because
+the vhost unsets `Eppn` early on every request before mod_shib repopulates it.
+Requiring a session on the report path alone does not work: the part page
+never sees the header, so the buttons never render, and a POST that detours
+through the IdP arrives without its body.
 
 **Media is committed to the repository.** 98 files, 51 MB in `public/`,
 unoptimised straight out of Directus. Only files the prose actually references

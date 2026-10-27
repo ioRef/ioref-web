@@ -114,6 +114,9 @@ INVENTORY_CACHE_SECONDS = env.int("INVENTORY_CACHE_SECONDS", default=120)
 # Shibboleth session on the report path and clears it everywhere else, so the
 # header is trusted only because nothing else can reach this application.
 REPORT_IDENTITY_HEADER = env("REPORT_IDENTITY_HEADER", default="HTTP_EPPN")
+# Where a signed-out visitor goes to sign in before reporting. The page's own
+# path is appended as the return target. Empty hides the link.
+REPORT_SIGN_IN_URL = env("REPORT_SIGN_IN_URL", default="/Shibboleth.sso/Login")
 
 
 # Internationalization

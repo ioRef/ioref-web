@@ -58,6 +58,8 @@
                 <button type="submit" name="kind" value="low" class="report-btn">Report running low</button>
                 <button type="submit" name="kind" value="out" class="report-btn">Report out of stock</button>
             </form>
+        {% elif sign_in_url %}
+            <div class="value"><a class="text-decoration-underline" href="{{ sign_in_url }}">Sign in to report this part running low or out</a></div>
         {% endif %}
     </div>
     {% if stock.latest_price.price is not None %}
