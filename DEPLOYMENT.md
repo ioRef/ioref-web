@@ -185,22 +185,33 @@ image is created by the first deployment, the same as ioref-inventory's.
 proxies the apex `/` to `127.0.0.1:8989`, and this container's Quadlet
 publishes to that same port (§5 above).
 
-Stock reports read the reporter from the `Eppn` header, so part pages need a
-lazy Shibboleth session. Inside the apex `VirtualHost`, alongside the
-`/inventory` blocks:
+Stock reports read the reporter from the `Eppn` header, so the vhost needs
+three things inside the `ioref.org` `<VirtualHost *:443>`:
 
 ```apache
+RequestHeader unset Eppn early
+# ...and Mail, Displayname, Remote-User, Persistent-Id, Subject-Id, Pairwise-Id
+
 <LocationMatch "^/parts/[^/]+/(report/)?$">
   AuthType shibboleth
   ShibRequestSetting requireSession 0
   ShibUseHeaders On
   Require shibboleth
 </LocationMatch>
+
+ProxyPass /Shibboleth.sso !
 ```
 
-`requireSession 0` keeps the pages public. The vhost's
-`RequestHeader unset Eppn early` is what makes the header trustworthy, and it
-must stay vhost-wide, not inside an `/inventory` block.
+The unset is what makes the header trustworthy: without it any client can
+send `Eppn` and file reports under any name. It must be vhost-wide and keep
+`early`, or mod_headers runs after mod_shib and strips the authentic value
+instead. `requireSession 0` keeps the pages public. The `ProxyPass` exclusion
+goes before the catch-all, or sign-in requests are proxied into this
+application.
+
+Because the vhost uses Shibboleth directives, its file must load after
+`01-shib.conf`, and it must load before `03-ioref-inventory.conf` to stay the
+default `*:443` block. It is installed as `conf.d/02-ioref-web.conf`.
 
 `guides.ioref.org` keeps redirecting to the apex, unchanged: that redirect
 exists because no Shibboleth endpoint is registered for that name, which
