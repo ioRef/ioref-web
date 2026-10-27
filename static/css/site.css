@@ -167,7 +167,8 @@
 .search-col ul { list-style: none; padding: 0; margin: 0; }
 .search-col li { margin-bottom: 1.1rem; }
 .search-col li h4 { font-size: 20px; margin: 0 0 .15rem; }
-.search-col .part-number { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9em; }
+.part-number { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.search-col .part-number { font-size: 0.9em; }
 .search-col .result-desc { margin: 0; font-size: 15px; line-height: 1.4; color: #4f4f4f; }
 .search-col .no-results, .search-col .search-more { color: #636466; font-style: italic; }
 .search-col li.discontinued, .search-col li.discontinued h4 a { text-decoration: line-through; color: #636466; }

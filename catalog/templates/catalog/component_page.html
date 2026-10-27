@@ -16,7 +16,7 @@
             {% with v=variants.0 %}
                 <div class="attribute">
                     <div class="label">ioRef component number:</div>
-                    <div class="value">{{ v.number }}</div>
+                    <div class="value"><span class="part-number">{{ v.number }}</span></div>
                 </div>
                 {% include "includes/variant_stock.html" with stock=v.stock %}
             {% endwith %}
