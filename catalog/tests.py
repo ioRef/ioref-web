@@ -675,6 +675,7 @@ class SearchColumnsTests(SimpleTestCase):
         self.assertContains(response, "<h2>ioRef Guides</h2>")
         self.assertContains(response, "<h2>Phys Comp Lab Parts</h2>")
         self.assertContains(response, 'href="/parts/0347/"')
+        self.assertContains(response, '<span class="part-number">#0347</span>')
         self.assertNotContains(response, "No results for Phys Comp Lab Parts")
 
     @patch("catalog.views.list_parts", return_value={"results": [], "count": 0})

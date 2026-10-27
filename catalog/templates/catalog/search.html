@@ -46,7 +46,7 @@
         <ul>
             {% for part in part_results %}
             <li class="{% if part.status == 'discontinued' %}discontinued{% endif %}">
-                <h4><a href="{% url 'part' part.part_number %}">{{ part.part_number }} {{ part.short_name }}</a></h4>
+                <h4><a href="{% url 'part' part.part_number %}"><span class="part-number">#{{ part.part_number }}</span> {{ part.short_name }}</a></h4>
                 {% if part.description %}
                 <p class="result-desc">{{ part.description }}</p>
                 {% endif %}
