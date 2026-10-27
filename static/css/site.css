@@ -148,6 +148,14 @@
   font-size: 14px;
 }
 
+.status_discontinued {
+  color: #a01038;
+  font-weight: 700;
+}
+
+.discontinued-toggle { margin: 0 0 1rem; font-size: 15px; }
+.discontinued-toggle label { cursor: pointer; }
+
 .stock_unknown {
   color: #636466;
   font-style: italic;

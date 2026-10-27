@@ -205,6 +205,10 @@ def _variant(stock):
 
 
 def _render_part(request, page, variants, part_title=None):
+    # Only a page for one part can be discontinued as a whole. A multi-part
+    # page names the discontinued parts in its stocked table instead.
+    only = variants[0]["stock"] if len(variants) == 1 else None
+    discontinued = bool(only) and only.get("status") == "discontinued"
     return render(
         request,
         "catalog/component_page.html",
@@ -213,6 +217,7 @@ def _render_part(request, page, variants, part_title=None):
             "part_title": part_title,
             "variants": variants,
             "related_parts": page.related_parts,
+            "discontinued": discontinued,
         },
     )
 
@@ -279,10 +284,15 @@ PART_RESULT_LIMIT = 50
 def search(request):
     catalogue = get_catalogue()
     query = request.GET.get("query", "")
+    include_discontinued = request.GET.get("include_discontinued") == "1"
     parts, part_total, parts_unavailable = [], 0, False
     if query.strip():
         try:
-            data = list_parts(search=query.strip(), limit=PART_RESULT_LIMIT)
+            data = list_parts(
+                search=query.strip(),
+                include_discontinued=include_discontinued,
+                limit=PART_RESULT_LIMIT,
+            )
         except InventoryUnavailable:
             parts_unavailable = True
         else:
@@ -297,5 +307,6 @@ def search(request):
             "part_results": parts,
             "part_total": part_total,
             "parts_unavailable": parts_unavailable,
+            "include_discontinued": include_discontinued,
         },
     )

@@ -703,3 +703,84 @@ class SearchColumnsTests(SimpleTestCase):
     def test_blank_query_asks_inventory_nothing(self, mock_list):
         self.client.get("/search/", {"query": "  "})
         mock_list.assert_not_called()
+
+
+class DiscontinuedPartTests(SimpleTestCase):
+    """Status on the part page, and the discontinued toggle in search."""
+
+    def part(self, status, **extra):
+        return {
+            "part_number": "0999",
+            "short_name": "LED strip",
+            "description": "RGB LED strip, 1 m",
+            "status": status,
+            "unit": "each",
+            **extra,
+        }
+
+    @patch("catalog.views.get_part")
+    def test_active_part_shows_status_in_plain_text(self, mock_get):
+        mock_get.return_value = self.part("active")
+        response = self.client.get("/parts/0999/")
+        self.assertContains(response, "Status:")
+        self.assertContains(response, "<div class=\"value\">Active</div>")
+        self.assertNotContains(response, "status_discontinued")
+        self.assertNotContains(response, "(Discontinued part)")
+
+    @patch("catalog.views.get_part")
+    def test_status_sits_between_description_and_availability(self, mock_get):
+        mock_get.return_value = self.part("active")
+        content = self.client.get("/parts/0999/").content.decode()
+        self.assertLess(content.index("Description:"), content.index("Status:"))
+        self.assertLess(content.index("Status:"), content.index("Available in the lab:"))
+
+    @patch("catalog.views.get_part")
+    def test_to_discontinue_is_red_with_help_text_after(self, mock_get):
+        mock_get.return_value = self.part("to_discontinue")
+        response = self.client.get("/parts/0999/")
+        self.assertContains(
+            response,
+            '<span class="status_discontinued">To Discontinue</span>: will not be restocked once inventory is empty',
+        )
+        self.assertNotContains(response, "(Discontinued part)")
+
+    @patch("catalog.views.get_part")
+    def test_discontinued_part_is_flagged_in_title_and_status(self, mock_get):
+        mock_get.return_value = self.part("discontinued")
+        response = self.client.get("/parts/0999/")
+        self.assertContains(
+            response, '<span class="status_discontinued">(Discontinued part)</span>'
+        )
+        self.assertContains(
+            response, '<span class="status_discontinued">Discontinued</span>'
+        )
+
+    @patch("catalog.views.get_part")
+    def test_other_status_text_is_printed_as_is(self, mock_get):
+        mock_get.return_value = self.part("on backorder")
+        response = self.client.get("/parts/0999/")
+        self.assertContains(response, "<div class=\"value\">on backorder</div>")
+        self.assertNotContains(response, "status_discontinued")
+
+    @patch("catalog.views.list_parts", return_value={"results": [], "count": 0})
+    def test_search_hides_discontinued_parts_by_default(self, mock_list):
+        response = self.client.get("/search/", {"query": "led"})
+        mock_list.assert_called_once()
+        self.assertFalse(mock_list.call_args.kwargs["include_discontinued"])
+        self.assertContains(response, 'name="include_discontinued"')
+        self.assertNotContains(response, "checked")
+
+    @patch("catalog.views.list_parts", return_value={"results": [], "count": 0})
+    def test_search_toggle_includes_discontinued_parts_when_checked(self, mock_list):
+        response = self.client.get(
+            "/search/", {"query": "led", "include_discontinued": "1"}
+        )
+        self.assertTrue(mock_list.call_args.kwargs["include_discontinued"])
+        self.assertContains(response, "checked")
+
+    @patch("stock.client._get", return_value={"results": [], "count": 0})
+    def test_client_asks_inventory_to_exclude_discontinued(self, mock_get):
+        from stock.client import list_parts
+
+        list_parts(search="led", include_discontinued=False)
+        self.assertEqual(mock_get.call_args.args[1]["include_discontinued"], "0")

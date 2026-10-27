@@ -24,6 +24,12 @@
             <div class="value">{{ stock.description }}</div>
         </div>
     {% endif %}
+    {% if stock.status %}
+    <div class="attribute">
+        <div class="label">Status:</div>
+        <div class="value">{% if stock.status == "to_discontinue" %}<span class="status_discontinued">To Discontinue</span>: will not be restocked once inventory is empty{% elif stock.status == "discontinued" %}<span class="status_discontinued">Discontinued</span>{% elif stock.status == "active" %}Active{% else %}{{ stock.status }}{% endif %}</div>
+    </div>
+    {% endif %}
     <div class="attribute">
         <div class="label">Available in the lab:</div>
         <div class="value">{% if stock.on_floor != None %}{{ stock.on_floor }}{% if stock.unit and stock.unit != "each" %} {{ stock.unit }}{% endif %}{% else %}not counted{% endif %}</div>
