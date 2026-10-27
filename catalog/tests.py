@@ -725,7 +725,7 @@ class DiscontinuedPartTests(SimpleTestCase):
         response = self.client.get("/parts/0999/")
         self.assertContains(response, "Status:")
         self.assertContains(response, "<div class=\"value\">Active</div>")
-        self.assertContains(response, '<span class="part-number">0999</span>')
+        self.assertContains(response, '<span class="part-number">#0999</span>')
         self.assertNotContains(response, "status_discontinued")
         self.assertNotContains(response, "(Discontinued part)")
 
