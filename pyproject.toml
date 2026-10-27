@@ -8,7 +8,7 @@ dependencies = [
     "gunicorn>=26.0.0",
     "httpx>=0.28.1",
     "markdown>=3.10.3",
-    "nh3>=0.3.6",
+    "nh3>=0.3.7",
     "pyyaml>=6.0.3",
     "whitenoise>=6.12.0",
 ]
@@ -28,5 +28,5 @@ select = ["E4", "E7", "E9", "F", "I"]
 [dependency-groups]
 dev = [
     "pillow>=12.3.0",
-    "ruff>=0.16,<0.17",
+    "ruff>=0.16.9,<0.17",
 ]
