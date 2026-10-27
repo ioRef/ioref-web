@@ -795,6 +795,7 @@ class StockReportTests(SimpleTestCase):
     STOCK = {
         "part_number": "0006",
         "short_name": "soldering sponge",
+        "status": "active",
         "group": {"slug": "fasteners", "name": "Fasteners"},
         "location": "Soldering bench",
     }
@@ -872,3 +873,114 @@ class StockReportTests(SimpleTestCase):
         from stock.client import report_stock
 
         self.assertFalse(report_stock("0006", "out", "x@andrew.cmu.edu"))
+
+
+class PartPanelLayoutTests(SimpleTestCase):
+    """The part panel's order, discontinued handling, and report states."""
+
+    SIGNED_IN = {"HTTP_EPPN": "someone@andrew.cmu.edu"}
+
+    def part(self, status="active", **extra):
+        return {
+            "part_number": "0999",
+            "short_name": "LED strip",
+            "description": "RGB LED strip, 1 m",
+            "status": status,
+            "unit": "each",
+            "on_floor": 3,
+            "in_backstock": 1,
+            "latest_price": {
+                "price": "1.25",
+                "currency": "USD",
+                "purchase_link": "https://example.com/led",
+                "supplier": "Example",
+            },
+            **extra,
+        }
+
+    @patch("catalog.views.get_part")
+    def test_discontinued_part_hides_counts(self, mock_get):
+        mock_get.return_value = self.part("discontinued")
+        response = self.client.get("/parts/0999/")
+        self.assertNotContains(response, "Available in the lab:")
+        self.assertNotContains(response, "Backstock:")
+
+    @patch("catalog.views.get_part")
+    def test_active_part_shows_counts(self, mock_get):
+        mock_get.return_value = self.part("active")
+        response = self.client.get("/parts/0999/")
+        self.assertContains(response, "Available in the lab:")
+        self.assertContains(response, "Backstock:")
+
+    @patch("catalog.views.get_part")
+    def test_purchase_link_label_is_bold(self, mock_get):
+        mock_get.return_value = self.part("active")
+        response = self.client.get("/parts/0999/")
+        self.assertContains(response, 'class="text-decoration-underline fw-bold"')
+
+    @patch("catalog.views.get_part")
+    def test_cost_follows_purchase_link_and_precedes_report(self, mock_get):
+        mock_get.return_value = self.part("active")
+        content = self.client.get("/parts/0999/", **self.SIGNED_IN).content.decode()
+        self.assertLess(content.index("Purchase link"), content.index("Cost:"))
+        self.assertLess(content.index("Cost:"), content.index('class="attribute stock-report"'))
+
+    @patch("catalog.views.get_part")
+    def test_signed_out_visitor_gets_a_sign_in_button(self, mock_get):
+        mock_get.return_value = self.part("active")
+        response = self.client.get("/parts/0999/")
+        self.assertContains(response, 'class="report-btn report-signin"')
+        self.assertContains(response, "running low or out of stock")
+        self.assertNotContains(response, "Report running low")
+
+    @patch("catalog.views.get_part")
+    def test_reporting_offered_for_active_and_unavailable_parts(self, mock_get):
+        for status in ("active", "unavailable"):
+            mock_get.return_value = self.part(status)
+            response = self.client.get("/parts/0999/", **self.SIGNED_IN)
+            self.assertContains(response, "Report running low")
+            self.assertContains(response, "Report out of stock")
+
+    @patch("catalog.views.get_part")
+    def test_reporting_hidden_for_discontinued_and_to_discontinue(self, mock_get):
+        for status in ("discontinued", "to_discontinue"):
+            mock_get.return_value = self.part(status)
+            response = self.client.get("/parts/0999/", **self.SIGNED_IN)
+            self.assertNotContains(response, "Report running low")
+            self.assertNotContains(response, "report-signin")
+
+    @patch("catalog.views.get_part")
+    def test_low_report_shows_chosen_button_and_message(self, mock_get):
+        mock_get.return_value = self.part("active")
+        response = self.client.get("/parts/0999/?reported=low", **self.SIGNED_IN)
+        self.assertContains(response, 'class="report-btn is-chosen"')
+        self.assertContains(
+            response,
+            "Thanks for reporting this part is low stock. The lab has been notified. "
+            "If you have further concerns or questions, please write ",
+        )
+        self.assertContains(response, 'href="mailto:help@ideate.cmu.edu"')
+        self.assertContains(response, '<span class="mono">help@ideate.cmu.edu</span>')
+
+    @patch("catalog.views.get_part")
+    def test_out_report_shows_out_of_stock_message(self, mock_get):
+        mock_get.return_value = self.part("active")
+        response = self.client.get("/parts/0999/?reported=out", **self.SIGNED_IN)
+        self.assertContains(response, "Thanks for reporting this part is out of stock.")
+
+    @patch("catalog.views.get_part")
+    def test_cost_unit_each_reads_each(self, mock_get):
+        mock_get.return_value = self.part("active", unit="each")
+        self.assertContains(self.client.get("/parts/0999/"), "$1.25 each")
+
+    @patch("catalog.views.get_part")
+    def test_cost_other_unit_reads_per_unit(self, mock_get):
+        for unit in ("foot", "row of 40 pins"):
+            mock_get.return_value = self.part("active", unit=unit)
+            self.assertContains(self.client.get("/parts/0999/"), f"$1.25 per {unit}")
+
+    @patch("catalog.views.get_part")
+    def test_cost_blank_unit_adds_nothing(self, mock_get):
+        mock_get.return_value = self.part("active", unit="")
+        response = self.client.get("/parts/0999/")
+        self.assertContains(response, "<div class=\"value\">$1.25</div>")

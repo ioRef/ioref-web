@@ -167,7 +167,7 @@
 .search-col ul { list-style: none; padding: 0; margin: 0; }
 .search-col li { margin-bottom: 1.1rem; }
 .search-col li h4 { font-size: 20px; margin: 0 0 .15rem; }
-.part-number { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.part-number, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 .search-col .part-number { font-size: 0.9em; }
 .search-col .result-desc { margin: 0; font-size: 15px; line-height: 1.4; color: #4f4f4f; }
 .search-col .no-results, .search-col .search-more { color: #636466; font-style: italic; }
@@ -179,4 +179,8 @@
 .stock-report form { margin-top: .4rem; display: flex; flex-wrap: wrap; gap: .4rem; }
 .stock-report .report-btn { min-height: 2.5rem; padding: .4rem .8rem; font-size: .95rem; background: #fdfdfd; color: #1d1d1d; border: 1px solid #636466; border-radius: 4px; cursor: pointer; }
 .stock-report .report-btn:hover { background: #f2f2f2; }
-.stock-report .report-note { margin-bottom: .3rem; font-weight: 600; }
+.stock-report { margin-top: 1.5rem; }
+.stock-report .report-btn.is-chosen { background: #1d1d1d; color: #fdfdfd; border-color: #1d1d1d; }
+.stock-report .report-btn.report-signin { display: inline-block; text-decoration: none; line-height: 1.4; }
+.stock-report .report-btn.report-signin:hover { color: #1d1d1d; }
+.stock-report .report-note { margin: .75rem 0 0; font-weight: 600; line-height: 1.4; }
