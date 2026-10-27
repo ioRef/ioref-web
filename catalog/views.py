@@ -8,9 +8,17 @@ startup, only that one page does.
 """
 
 from types import SimpleNamespace
+from urllib.parse import urlencode, urlparse
 
-from django.http import Http404
+from django.conf import settings
+from django.http import (
+    Http404,
+    HttpResponseBadRequest,
+    HttpResponseForbidden,
+    HttpResponseNotAllowed,
+)
 from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from stock.client import (
     InventoryUnavailable,
@@ -18,6 +26,9 @@ from stock.client import (
     list_parts,
     list_groups_by_category,
     list_ungrouped_parts_by_category,
+)
+from stock.client import (
+    report_stock as file_stock_report,
 )
 
 from .content import get_catalogue, load_categories
@@ -204,6 +215,16 @@ def _variant(stock):
     }
 
 
+def _reporter(request):
+    return (request.META.get(settings.REPORT_IDENTITY_HEADER) or "").strip()
+
+
+def _sign_in_url(request):
+    if _reporter(request) or not settings.REPORT_SIGN_IN_URL:
+        return ""
+    return f"{settings.REPORT_SIGN_IN_URL}?{urlencode({'target': request.get_full_path()})}"
+
+
 def _render_part(request, page, variants, part_title=None):
     # Only a page for one part can be discontinued as a whole. A multi-part
     # page names the discontinued parts in its stocked table instead.
@@ -218,8 +239,34 @@ def _render_part(request, page, variants, part_title=None):
             "variants": variants,
             "related_parts": page.related_parts,
             "discontinued": discontinued,
+            "can_report": bool(_reporter(request)),
+            "sign_in_url": _sign_in_url(request),
+            "reported": request.GET.get("reported", ""),
         },
     )
+
+
+REPORT_KINDS = ("low", "out")
+
+
+def report_stock(request, slug):
+    """A signed-in person says a part is running low or out. Recorded in inventory."""
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+    reporter = _reporter(request)
+    if not reporter:
+        return HttpResponseForbidden(
+            "Sign in with your university account to report stock."
+        )
+    origin = request.headers.get("Origin")
+    if origin and urlparse(origin).netloc != request.get_host():
+        return HttpResponseForbidden("Cross-site report refused.")
+    kind = request.POST.get("kind", "")
+    if kind not in REPORT_KINDS:
+        return HttpResponseBadRequest("Unknown report.")
+    filed = file_stock_report(slug, kind, reporter)
+    flag = kind if filed else "error"
+    return redirect(f"{reverse('part', kwargs={'slug': slug})}?reported={flag}")
 
 
 def _variants(page):

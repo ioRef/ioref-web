@@ -120,12 +120,17 @@ test in the Commands section checks the URLs.
 straight copy of maker-cards' compiled stylesheet; additions go in `site.css`
 so the copy can be resynced without merging.
 
-**There is no sign-in, because there is nothing to sign in to.** An earlier
-revision put the Wagtail admin behind CMU Shibboleth, with a custom user model,
-a trusted-header backend and a vhost that cleared the identity headers. All of
-it went when the CMS did; recover it from git history if a web editor ever comes
-back. ioref-inventory still uses that arrangement for staff count entry, and is
-unaffected.
+**Sign-in exists for one thing: filing a stock report.** There are no accounts
+and no sessions here. Part pages sit under a lazy Shibboleth session, so a
+visitor who has signed in arrives with `Eppn` and one who has not arrives
+without it and sees a sign-in link instead of the report buttons. The report
+itself is stored in ioref-inventory, which emails it.
+
+`REPORT_IDENTITY_HEADER` is trusted unconditionally, which is safe only because
+the vhost unsets `Eppn` early on every request before mod_shib repopulates it.
+Requiring a session on the report path alone does not work: the part page
+never sees the header, so the buttons never render, and a POST that detours
+through the IdP arrives without its body.
 
 **Media is committed to the repository.** 98 files, 51 MB in `public/`,
 unoptimised straight out of Directus. Only files the prose actually references
@@ -189,12 +194,11 @@ not a mapping file here -- see its own docstring: "the person who creates a
 group is the person who knows which category it belongs to, and making them
 edit a second repository to say so is how a taxonomy goes stale."
 `/category/<slug>/` calls `list_groups_by_category()` on every request and
-shows every group inventory returns, whether or not a guide exists for it; a
-guided group links to its guide, an unguided one links to
-`/inventory/?group=<slug>`. This is a browse view in the same sense
-`/inventory/` is one: `InventoryUnavailable` renders as a 503, not an empty
-category, for the same reason `list_parts()` raises rather than returning
-`[]`.
+shows every group inventory returns, whether or not a guide exists for it. A
+guided group links to its guide, and an unguided one links to its filtered
+view at `inventory.ioref.org`. `InventoryUnavailable` renders as a 503, not an
+empty category, for the same reason `list_parts()` raises rather than
+returning `[]`.
 
 **`/c/<slug>/` is a redirect, not a second view.** `category_page.html` has
 exactly one caller. `category_alias` rewrites the path and hands off; it does
@@ -207,13 +211,12 @@ predate this rebuild and carry bare URLs with no prefix -- `ioref.org/resistor`
 (a group), `ioref.org/0496` (a part number) -- so `<slug:token>/` in
 `catalog/urls.py` catches anything not claimed by a named route above it and
 `views.resolve_legacy` works out which case it is: a local guide slug first
-(free, no inventory involved), then a live part-number lookup, preferring the
-part's group's guide over `/inventory/<number>/` if one exists. Ordering in
-`urls.py` is what makes this safe -- see the note there. `stock/views.py`'s
-`_guide_for` is the same resolution, reused: it used to only check a guide's
-inline `parts:` list, which went from covering every guide to covering two of
-them the day guides became group-keyed, and nothing caught it. Both places
-now check the live group first.
+(free, no inventory involved), then a live part-number lookup. Every known
+part number redirects to its canonical `/parts/<number>/` page. That page
+adds the corresponding guide when one exists and otherwise renders only its
+stock information. Ordering in `urls.py` is what makes this safe. The
+`/inventory/` routes are permanent compatibility redirects to
+`inventory.ioref.org`; ioref-web does not render an inventory browser.
 
 **The five categories themselves are hardcoded, not fetched.** `content/
 categories.yml` lists `input`, `output`, `power`, `connector`, `controller`
@@ -290,6 +293,25 @@ List items in commit bodies use `*`, not `-`. Commits made with Claude end with 
 The subject is imperative and lower-case, under about 72 characters. Where a
 change encodes a decision, put the reasoning in the body -- this project has
 several constraints that look arbitrary without it.
+
+## Chores
+
+At the start of a session, and again after a commit, take a quick look at
+what is waiting:
+
+```bash
+gh pr list -R ioRef/ioref-web
+gh issue list -R ioRef/ioref-web
+```
+
+If anything is open, mention it in a line and offer to pick it up. Chores
+are worth doing: a Dependabot pull request merged this week is a two-minute
+job, where three left for a month conflict with each other on `uv.lock`, and
+the issues are small, well-scoped tasks that make good warm-ups. Offer, don't
+insist, and never act on them unasked.
+
+Changes touching sign-in, API keys, the vhost or the deploy workflows go
+through a pull request rather than straight to `main`.
 
 ## Commands
 

@@ -8,9 +8,9 @@
 # Pinned, and given its own stage rather than an inline `COPY --from=ghcr.io/...`:
 # Dependabot's docker ecosystem reads FROM lines, so this is what makes the uv
 # version something it can raise a pull request against.
-FROM ghcr.io/astral-sh/uv:0.12.5 AS uv
+FROM ghcr.io/astral-sh/uv:0.12.21 AS uv
 
-FROM python:3.13-slim AS base
+FROM python:3.14-slim AS base
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     UV_COMPILE_BYTECODE=1 \
@@ -52,6 +52,12 @@ EXPOSE 8000
 # ALLOWED_HOSTS otherwise 400s every single probe, forever, which urlopen
 # raises as an uncaught exception. Falls back to 127.0.0.1 for a bare local
 # run with nothing configured (see config/settings/dev.py's ALLOWED_HOSTS).
+#
+# Only observed by a local `docker build`/`docker compose up`. The build
+# workflow pushes a plain OCI image to GHCR, and the OCI Image Spec has no
+# field for this instruction at all, so it never reaches production; the
+# real production Quadlet defines the identical check itself via HealthCmd=
+# (see DEPLOYMENT.md), independent of the image.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD python -c "import os,urllib.request,sys; host=os.environ.get('ALLOWED_HOSTS','').split(',')[0].strip() or '127.0.0.1'; req=urllib.request.Request('http://127.0.0.1:8000/', headers={'Host': host}); sys.exit(0 if urllib.request.urlopen(req).status==200 else 1)"
 

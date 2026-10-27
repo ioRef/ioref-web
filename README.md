@@ -1,13 +1,24 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ioref/.github/main/branding/wordmark.svg" alt="ioRef" width="360">
+</p>
+
+<p align="center">
+  ioRef is a set of tools for exploring, connecting, and coding<br>
+  with components used in creative physical computing.
+</p>
+
+---
+
 # ioref-web
 
-The public ioref.org site: maker cards, categories, part sets, and a native
-inventory browser. Django, with no CMS and no database.
+The public ioref.org site: maker cards, categories, and part sets. Django,
+with no CMS and no database.
 
 The guides are markdown files in `content/`. Editing the site means editing a
 file and committing it.
 
 Replaces **maker-cards** (`guides.ioref.org`, Express + Handlebars + Directus).
-Visually it is the same site — `static/css/main.css` is carried over verbatim
+Visually it is the same site. `static/css/main.css` is carried over verbatim,
 and the templates are ports of the original Handlebars ones.
 
 Stock lives in **ioref-inventory**, a separate repository with its own database.
@@ -86,7 +97,8 @@ any of this.
 ```
 /parts/<group-slug>/      a guide
 /category/<slug>/         live browse, /c/<slug>/ redirects here
-/part-sets/, /search/, /inventory/
+/part-sets/, /search/
+/inventory/                compatibility redirect to inventory.ioref.org
 /<token>/                 printed cards: ioref.org/resistor, ioref.org/0496
 ```
 
@@ -94,8 +106,8 @@ The last one exists because a deck of physical reference cards already has
 URLs printed on it with no prefix at all — a bare group slug or a bare part
 number. They cannot be reprinted, so `catalog/views.resolve_legacy` resolves
 whichever one it is and redirects to the real page: a local guide slug first
-(no inventory involved), then a live part-number lookup that prefers the
-part's group's guide over a plain inventory listing if a guide exists.
+(no inventory involved), then a live part-number lookup that redirects to the
+canonical `/parts/<part-number>/` page.
 
 ## Structure
 
@@ -157,18 +169,11 @@ Results are cached for `INVENTORY_CACHE_SECONDS` (default 120). 404s are cached
 too, so a part with a guide but no stock record is not re-requested on every
 pageview; 500s are not, since they are transient.
 
-## Native inventory browser
-
-`/inventory/` — the listing maker-cards did not have. It linked out to a
-separate application with `target="_blank"`; this renders the same data in the
-site's own chrome, with search, status filtering, and links across to the maker
-card where one exists. Read-only: the API key is read-scoped.
-
 ## Styling
 
 `static/css/main.css` is an unmodified copy from
 `maker-cards/public/css/main.scss`. Do not edit it — put changes in
-`static/css/site.css`, which holds only the inventory-view styles. To resync:
+`static/css/site.css`. To resync:
 
 ```bash
 npx sass static/css/main.scss static/css/main.css
@@ -204,7 +209,7 @@ Of 1,511 source rows in Directus about 130 carried guide content, and 40 of
 those survive as files in `content/parts/` today. The rest were stock rows
 with no prose of their own, or value variants of a group that now has one
 page (31 resistor rows became one), or ungrouped items nobody wrote up; all
-of it is still browsable at `/inventory/`. The seven `docs_*` fields were
+of it remains browsable in ioref-inventory. The seven `docs_*` fields were
 markdown in Directus and are markdown here, byte for byte.
 
 The Wagtail-era importer and the exporter that produced `content/` are in git

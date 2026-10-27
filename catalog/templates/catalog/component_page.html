@@ -18,7 +18,7 @@
                     <div class="label">ioRef component:</div>
                     <div class="value"><span class="part-number">#{{ v.number }}</span></div>
                 </div>
-                {% include "includes/variant_stock.html" with stock=v.stock %}
+                {% include "includes/variant_stock.html" with stock=v.stock can_report=can_report sign_in_url=sign_in_url reported=reported %}
             {% endwith %}
         {% endif %}
 
