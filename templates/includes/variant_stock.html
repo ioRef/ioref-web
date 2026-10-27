@@ -47,6 +47,21 @@
             </div>
         {% endif %}
     {% endwith %}
+    <div class="attribute stock-report">
+        {% if reported == "error" %}
+            <div class="value report-note">That report didn't reach the lab. Please try again.</div>
+        {% elif reported %}
+            <div class="value report-note">Thanks. The lab has been told.</div>
+        {% endif %}
+        {% if can_report %}
+            <form method="post" action="{% url 'report_stock' stock.part_number %}">
+                <button type="submit" name="kind" value="low" class="report-btn">Report running low</button>
+                <button type="submit" name="kind" value="out" class="report-btn">Report out of stock</button>
+            </form>
+        {% elif sign_in_url %}
+            <div class="value"><a class="text-decoration-underline" href="{{ sign_in_url }}">Sign in to report this part running low or out</a></div>
+        {% endif %}
+    </div>
     {% if stock.latest_price.price is not None %}
         <div class="attribute">
             <div class="label">Cost:</div>

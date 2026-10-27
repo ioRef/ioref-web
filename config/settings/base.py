@@ -110,6 +110,14 @@ INVENTORY_API_TIMEOUT = env.float("INVENTORY_API_TIMEOUT", default=3.0)
 # site. Short cache keeps inventory out of the hot path without going stale.
 INVENTORY_CACHE_SECONDS = env.int("INVENTORY_CACHE_SECONDS", default=120)
 
+# Stock reports need a verified person. Apache sets this header from the
+# Shibboleth session on the report path and clears it everywhere else, so the
+# header is trusted only because nothing else can reach this application.
+REPORT_IDENTITY_HEADER = env("REPORT_IDENTITY_HEADER", default="HTTP_EPPN")
+# Where a signed-out visitor goes to sign in before reporting. The page's own
+# path is appended as the return target. Empty hides the link.
+REPORT_SIGN_IN_URL = env("REPORT_SIGN_IN_URL", default="/Shibboleth.sso/Login")
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/

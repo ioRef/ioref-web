@@ -22,6 +22,7 @@ urlpatterns = [
     path("part-sets/", views.part_set_index, name="part_set_index"),
     path("part-sets/<slug:slug>/", views.part_set, name="part_set"),
     path("parts/<slug:slug>/", views.part, name="part"),
+    path("parts/<slug:slug>/report/", views.report_stock, name="report_stock"),
     path("categories/<slug:category_slug>/", views.category, name="category"),
     path("c/<slug:category_slug>/", views.category_alias, name="category_alias"),
     path("<slug:token>/", views.resolve_legacy, name="resolve_legacy"),

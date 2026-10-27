@@ -165,3 +165,8 @@
 @media (max-width: 700px) {
     .search-columns { grid-template-columns: 1fr; gap: 2rem; }
 }
+
+.stock-report form { margin-top: .4rem; display: flex; flex-wrap: wrap; gap: .4rem; }
+.stock-report .report-btn { min-height: 2.5rem; padding: .4rem .8rem; font-size: .95rem; background: #fdfdfd; color: #1d1d1d; border: 1px solid #636466; border-radius: 4px; cursor: pointer; }
+.stock-report .report-btn:hover { background: #f2f2f2; }
+.stock-report .report-note { margin-bottom: .3rem; font-weight: 600; }
