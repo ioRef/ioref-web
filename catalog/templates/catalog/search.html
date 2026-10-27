@@ -30,13 +30,23 @@
 
     <section class="search-col">
         <h2>Phys Comp Lab Parts</h2>
+        {% if not parts_unavailable %}
+        <form method="get" action="" class="discontinued-toggle" data-autosubmit>
+            <input type="hidden" name="query" value="{{ search_query }}">
+            <label>
+                <input type="checkbox" name="include_discontinued" value="1"{% if include_discontinued %} checked{% endif %}>
+                Include discontinued parts
+            </label>
+            <noscript><button type="submit">Update</button></noscript>
+        </form>
+        {% endif %}
         {% if parts_unavailable %}
         <p class="no-results">Parts search is unavailable right now.</p>
         {% elif part_results %}
         <ul>
             {% for part in part_results %}
             <li class="{% if part.status == 'discontinued' %}discontinued{% endif %}">
-                <h4><a href="{% url 'part' part.part_number %}">{{ part.part_number }} {{ part.short_name }}</a></h4>
+                <h4><a href="{% url 'part' part.part_number %}"><span class="part-number">#{{ part.part_number }}</span> {{ part.short_name }}</a></h4>
                 {% if part.description %}
                 <p class="result-desc">{{ part.description }}</p>
                 {% endif %}

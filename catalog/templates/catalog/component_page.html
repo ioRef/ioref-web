@@ -10,13 +10,13 @@
 {% block content %}
 <div class="part_page">
     <div class="side_menu part_attributes shrinkable">
-        <div class="part_name">{{ part_title|default:page.title }}</div>
+        <div class="part_name">{{ part_title|default:page.title }}{% if discontinued %} <span class="status_discontinued">(Discontinued part)</span>{% endif %}</div>
 
         {% if variants|length == 1 %}
             {% with v=variants.0 %}
                 <div class="attribute">
-                    <div class="label">ioRef component number:</div>
-                    <div class="value">{{ v.number }}</div>
+                    <div class="label">ioRef component:</div>
+                    <div class="value"><span class="part-number">#{{ v.number }}</span></div>
                 </div>
                 {% include "includes/variant_stock.html" with stock=v.stock %}
             {% endwith %}

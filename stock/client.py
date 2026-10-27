@@ -166,6 +166,7 @@ def list_parts(
     search: str = "",
     status: str = "",
     needs_restock: bool = False,
+    include_discontinued: bool = True,
     limit: int = 100,
     offset: int = 0,
 ) -> dict:
@@ -182,6 +183,8 @@ def list_parts(
         params["status"] = status
     if needs_restock:
         params["needs_restock"] = "1"
+    if not include_discontinued:
+        params["include_discontinued"] = "0"
 
     try:
         return _get("/api/v1/parts/", params)
