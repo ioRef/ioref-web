@@ -294,6 +294,25 @@ The subject is imperative and lower-case, under about 72 characters. Where a
 change encodes a decision, put the reasoning in the body -- this project has
 several constraints that look arbitrary without it.
 
+## Chores
+
+At the start of a session, and again after a commit, take a quick look at
+what is waiting:
+
+```bash
+gh pr list -R ioRef/ioref-web
+gh issue list -R ioRef/ioref-web
+```
+
+If anything is open, mention it in a line and offer to pick it up. Chores
+are worth doing: a Dependabot pull request merged this week is a two-minute
+job, where three left for a month conflict with each other on `uv.lock`, and
+the issues are small, well-scoped tasks that make good warm-ups. Offer, don't
+insist, and never act on them unasked.
+
+Changes touching sign-in, API keys, the vhost or the deploy workflows go
+through a pull request rather than straight to `main`.
+
 ## Commands
 
 ```bash
