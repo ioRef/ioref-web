@@ -658,6 +658,56 @@ class CheckCategoriesTests(SimpleTestCase):
         self.assertIn("unreachable", str(caught.exception))
 
 
+class SearchColumnsTests(SimpleTestCase):
+    PART = {
+        "part_number": "0347",
+        "short_name": "keyboard switch",
+        "description": "switch, keyboard, momentary",
+        "status": "active",
+    }
+    RETIRED = {
+        "part_number": "0348",
+        "short_name": "old keyboard",
+        "description": "",
+        "status": "discontinued",
+    }
+
+    @patch("catalog.views.list_parts", return_value={"results": [PART], "count": 1})
+    def test_parts_column_lists_matches_and_links_to_part_pages(self, _):
+        response = self.client.get("/search/", {"query": "keyboard"})
+        self.assertContains(response, "<h2>ioRef Guides</h2>")
+        self.assertContains(response, "<h2>Phys Comp Lab Parts</h2>")
+        self.assertContains(response, 'href="/parts/0347/"')
+        self.assertNotContains(response, "No results for Phys Comp Lab Parts")
+
+    @patch("catalog.views.list_parts", return_value={"results": [], "count": 0})
+    def test_empty_columns_say_so_and_both_still_print(self, _):
+        response = self.client.get("/search/", {"query": "zzqqxx"})
+        self.assertContains(response, "No results for ioRef Guides")
+        self.assertContains(response, "No results for Phys Comp Lab Parts")
+
+    @patch("catalog.views.list_parts", return_value={"results": [RETIRED], "count": 1})
+    def test_discontinued_parts_are_struck_through(self, _):
+        response = self.client.get("/search/", {"query": "keyboard"})
+        self.assertContains(response, 'class="discontinued"')
+
+    @patch("catalog.views.list_parts", side_effect=InventoryUnavailable())
+    def test_inventory_outage_is_not_shown_as_no_results(self, _):
+        response = self.client.get("/search/", {"query": "keyboard"})
+        self.assertContains(response, "Parts search is unavailable right now.")
+        self.assertNotContains(response, "No results for Phys Comp Lab Parts")
+
+    @patch("catalog.views.list_parts", return_value={"results": [PART] * 50, "count": 120})
+    def test_a_long_part_list_says_how_many_more_there_are(self, _):
+        response = self.client.get("/search/", {"query": "keyboard"})
+        self.assertContains(response, "Showing the first 50 of 120 parts.")
+
+    @patch("catalog.views.list_parts")
+    def test_blank_query_asks_inventory_nothing(self, mock_list):
+        self.client.get("/search/", {"query": "  "})
+        mock_list.assert_not_called()
+
+
 class StockReportTests(SimpleTestCase):
     STOCK = {
         "part_number": "0006",
