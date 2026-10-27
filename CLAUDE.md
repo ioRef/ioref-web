@@ -194,12 +194,11 @@ not a mapping file here -- see its own docstring: "the person who creates a
 group is the person who knows which category it belongs to, and making them
 edit a second repository to say so is how a taxonomy goes stale."
 `/category/<slug>/` calls `list_groups_by_category()` on every request and
-shows every group inventory returns, whether or not a guide exists for it; a
-guided group links to its guide, an unguided one links to
-`/inventory/?group=<slug>`. This is a browse view in the same sense
-`/inventory/` is one: `InventoryUnavailable` renders as a 503, not an empty
-category, for the same reason `list_parts()` raises rather than returning
-`[]`.
+shows every group inventory returns, whether or not a guide exists for it. A
+guided group links to its guide, and an unguided one links to its filtered
+view at `inventory.ioref.org`. `InventoryUnavailable` renders as a 503, not an
+empty category, for the same reason `list_parts()` raises rather than
+returning `[]`.
 
 **`/c/<slug>/` is a redirect, not a second view.** `category_page.html` has
 exactly one caller. `category_alias` rewrites the path and hands off; it does
@@ -212,13 +211,12 @@ predate this rebuild and carry bare URLs with no prefix -- `ioref.org/resistor`
 (a group), `ioref.org/0496` (a part number) -- so `<slug:token>/` in
 `catalog/urls.py` catches anything not claimed by a named route above it and
 `views.resolve_legacy` works out which case it is: a local guide slug first
-(free, no inventory involved), then a live part-number lookup, preferring the
-part's group's guide over `/inventory/<number>/` if one exists. Ordering in
-`urls.py` is what makes this safe -- see the note there. `stock/views.py`'s
-`_guide_for` is the same resolution, reused: it used to only check a guide's
-inline `parts:` list, which went from covering every guide to covering two of
-them the day guides became group-keyed, and nothing caught it. Both places
-now check the live group first.
+(free, no inventory involved), then a live part-number lookup. Every known
+part number redirects to its canonical `/parts/<number>/` page. That page
+adds the corresponding guide when one exists and otherwise renders only its
+stock information. Ordering in `urls.py` is what makes this safe. The
+`/inventory/` routes are permanent compatibility redirects to
+`inventory.ioref.org`; ioref-web does not render an inventory browser.
 
 **The five categories themselves are hardcoded, not fetched.** `content/
 categories.yml` lists `input`, `output`, `power`, `connector`, `controller`

@@ -24,7 +24,7 @@ environ.Env.read_env(BASE_DIR / ".env")
 # dev.py and production.py both import from here with `from .base import *`.
 # dev.py overrides both of these unconditionally with its own hardcoded
 # values, so this default only ever takes effect if production.py is run
-# without SECRET_KEY set in the environment -- which .env.example documents
+# without SECRET_KEY set in the environment, which .env.example documents
 # as required, but nothing previously enforced.
 SECRET_KEY = env("SECRET_KEY", default="django-insecure-dev-only-do-not-deploy")
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
