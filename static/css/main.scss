@@ -581,9 +581,9 @@ mark {
       top: $LOGO_HEIGHT + 2 * $MARGIN;
       padding-right: $MARGIN;
       width: $SIDE_AREA_WIDTH;
-      // this can apparently be zero, but it must be defined. Combined with overflow visible,
-      // we get the effect we want, but content is still visible.  CSS is weird.
-      height: 0;
+      // Sized to its content, so the grid row grows with a tall menu and the footer
+      // sits below it. A zero height let the menu's text run over the footer.
+      height: auto;
       overflow-y: visible;
 
       &.shrink {
