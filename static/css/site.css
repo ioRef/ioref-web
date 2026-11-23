@@ -184,3 +184,11 @@
 .stock-report .report-btn.report-signin { display: inline-block; text-decoration: none; line-height: 1.4; }
 .stock-report .report-btn.report-signin:hover { color: #1d1d1d; }
 .stock-report .report-note { margin: .75rem 0 0; font-weight: 600; line-height: 1.4; }
+
+/* The hero photo at the top of a part page. Capped by height, not width, so
+   landscape and portrait photos both stay a reasonable size. The diagrams in
+   the prose use the general .part_page .content img rule in main.css. */
+.part_page .content .part_image img {
+  max-height: 360px;
+  width: auto;
+}
